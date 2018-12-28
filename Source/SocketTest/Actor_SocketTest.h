@@ -29,14 +29,26 @@ public:
 	/** 每当从一个关卡移除此actor时调用 */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
+	// 创建Socket并连接到服务器
 	UFUNCTION(BlueprintCallable, Category = "CGA Socket")
 		bool SocketCreate(FString IPStr, int32 port);
-	UFUNCTION(BlueprintCallable, Category = "MySocket")
+
+	// 发消息
+	UFUNCTION(BlueprintCallable, Category = "CGA Socket")
 		void SocketSend(FString meesage);
-	UFUNCTION(BlueprintPure, Category = "MySocket")
+
+	// 收消息
+	UFUNCTION(BlueprintPure, Category = "CGA Socket")
 		void SocketReceive(bool& bReceive, FString& recvMessage);
 
+	//UFUNCTION(BlueprintCallable, Category = "CGA Socket")
+	//	bool ThreadEnd();
+
+	// 将二进制转为 String 字符串
 	FString StringFromBinaryArray(TArray<uint8> BinaryArray);
+
+public:
 	FSocket *SocketClient;
 	FIPv4Address ip;
+	FRunnableThread* m_RecvThread;
 };
