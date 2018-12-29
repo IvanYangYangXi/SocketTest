@@ -35,7 +35,7 @@ public:
 
 	// 发消息
 	UFUNCTION(BlueprintCallable, Category = "CGA Socket")
-		void SocketSend(FString meesage);
+		void SocketSend(FString meesage, bool bAddNull);
 
 	// 收消息
 	UFUNCTION(BlueprintPure, Category = "CGA Socket")

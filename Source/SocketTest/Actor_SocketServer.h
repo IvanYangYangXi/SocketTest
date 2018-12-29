@@ -47,7 +47,7 @@ public:
 
 	// 发消息
 	UFUNCTION(BlueprintCallable, Category = "CGA Socket")
-		bool sendSocketServer(const FString& sendMessage);
+		bool sendSocketServer(const FString& sendMessage, bool bAddNull);
 
 	// 收消息
 	UFUNCTION(BlueprintCallable, Category = "CGA Socket")

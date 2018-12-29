@@ -68,13 +68,18 @@ bool AActor_SocketTest::SocketCreate(FString IPStr, int32 port)
 }
 
 // 发消息
-void AActor_SocketTest::SocketSend(FString meesage)
+void AActor_SocketTest::SocketSend(FString meesage, bool bAddNull)
 {
 
 	TCHAR *seriallizedChar = meesage.GetCharArray().GetData(); // 要发送的缓冲区
 	int32 size = FCString::Strlen(seriallizedChar); // 要发送的数据大小（末尾若要加null字符，则值 +1）
 	int32 sent = 0; // 已发送的数据大小
 
+	if (bAddNull)
+	{
+		size++;
+	}
+	
 	// 发送缓冲区
 	if (SocketClient->Send((uint8*)TCHAR_TO_UTF8(seriallizedChar), size, sent))
 	{
@@ -107,7 +112,7 @@ void AActor_SocketTest::SocketReceive(bool & bReceive, FString & recvMessage)
 	// 接收数据包
 	while (SocketClient->HasPendingData(size)) // 查询套接字以确定队列中是否有未决数据
 	{
-		ReceiveData.Init(element, FMath::Min(size-1, 65507u));
+		ReceiveData.Init(element, FMath::Min(size, 65507u));
 		int32 read = 0;
 
 		SocketClient->Recv(ReceiveData.GetData(), ReceiveData.Num(), read);

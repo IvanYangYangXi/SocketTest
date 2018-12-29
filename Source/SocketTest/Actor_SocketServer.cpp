@@ -52,9 +52,14 @@ bool AActor_SocketServer::CreateSocketServer()
 	SocketServer = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("TCP SocketServer"), false);
 
 	if (!SocketServer) {
+		GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, TEXT("SocketServer Create failed!"));
+		UE_LOG(LogTemp, Warning, TEXT("SocketServer Create failed!"));
 		return false;
 	}
-	SocketServer->SetNonBlocking(false); // 将此套接字设置为非阻塞模式。如果成功则为true，否则为false。
+	//SocketServer->SetNonBlocking(true); // 将此套接字设置为非阻塞模式。如果成功则为true，否则为false。
+
+	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, TEXT("SocketServer Create succ!"));
+	UE_LOG(LogTemp, Warning, TEXT("SocketServer Create succ!"));
 	return true;
 }
 
@@ -99,7 +104,7 @@ bool AActor_SocketServer::acceptSocketServer(const FString & TheIP, const int32 
 }
 
 // 发消息
-bool AActor_SocketServer::sendSocketServer(const FString& sendMessage)
+bool AActor_SocketServer::sendSocketServer(const FString& sendMessage, bool bAddNull)
 {
 	TSharedRef<FInternetAddr> targetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 
@@ -107,8 +112,14 @@ bool AActor_SocketServer::sendSocketServer(const FString& sendMessage)
 
 	bool bsend;
 	TCHAR *seriallizedChar = serialized.GetCharArray().GetData();
-	int32 size = FCString::Strlen(seriallizedChar) + 1; // 要发送的数据大小（末尾若要加null字符，则值 +1）
+	int32 size = FCString::Strlen(seriallizedChar); // 要发送的数据大小（末尾若要加null字符，则值 +1）
 	int32 sent = 0;
+
+	if (bAddNull)
+	{
+		size++;
+	}
+
 	// 发送缓冲区; 注意，要用客户端这个socket
 	bsend = SocketClient->SendTo((uint8*)TCHAR_TO_UTF8(seriallizedChar), size, sent, *targetAddr);
 
@@ -143,13 +154,13 @@ void AActor_SocketServer::recvSocketServer()
 		if (ReceivedData.Num() > 0)
 		{
 			//打印
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Data Bytes Read ~> %d"), ReceivedData.Num()));
 			FString ReceivedUE4String = StringFromBinaryArray(ReceivedData);
-			GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("As String Data ~> %s"), *ReceivedUE4String));
-			//判断是否发送了相对的指令，进行对应事件调用
+			UE_LOG(LogTemp, Warning, TEXT("Server Recv log:   %s"), *ReceivedUE4String);
+
+			// 判断是否发送了相对的指令，进行对应事件调用
 			if (ReceivedUE4String.Equals("test"))
 			{
-				sendSocketServer("server auto send ");
+				sendSocketServer("server auto send", true);
 			}
 		}
 	}
